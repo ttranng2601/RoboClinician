@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RoboClinician</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='/style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="title">
+            RoboClinician
+        </div>
+        <div class="logout">
+            <button id="logout" onclick="location.href='/logout/'">LOGOUT</button>
+        </div>
+    </div>
+    <form class="container" method="POST">
+        <div class="sidebox">
+            <div class="profile">
+                <div class="profile-pic">
+                    <img src="{{ url_for('static', filename='images/profile-pic.jpg') }}" alt="Profile Picture" style="width: auto; height: 215px;">
+                </div>
+
+                <div class="Info">
+                    Name : <span id="name" class="green-text">{{data.username}}</span></br>
+                    Email: <span id="height" class="green-text">{{data.useremail}}</span></br>
+                </div>
+            </div>
+
+            <div class="med-history">
+                <label>&gt; Past Medical History:</label>
+                {% if data.past is none %}
+                    <input type="text" id="pastHis" name="pastHis" class="green-text"></input>
+                {% else %}
+                    <input type="text" id="pastHis" name="pastHis" class="green-text"  placeholder={{data.past}}>
+                {% endif %} 
+
+                <label>&gt; Present Medical History:</label>
+                {% if data.present is none %}
+                    <input type="text" id="presentHis" name="presentHis" class="green-text"></input>
+                {% else %}
+                    <input type="text" id="presentHis" name="presentHis" class="green-text" placeholder={{data.present}}>
+                {% endif %} 
+                <label id="tokens">&gt; Response Limit: </label>
+                <div class="slidecontainer">       
+                    <input type="range" min="1" max="2048" value="{{data.limit}}" class="slider" id="myRange" name="myRange" oninput="this.nextElementSibling.value = this.value">
+                    {% if data.limit is none %}
+                        <output style="color: #33ff33; font-size:13px;">100</output>
+                    {% else %}
+                        <output style="color: #33ff33; font-size:13px;">{{data.limit}}</output>
+                    {% endif %} 
+                </div>
+            </div>
+        </div>
+        <div class="mainbox">
+            <div class="textbox response-textbox">
+                <textarea id="answer" rows="4" cols="50" style="overflow:scroll; text-transform:uppercase;"></textarea>
+            </div>
+            <div class="textbox symptoms-textbox">
+                <p style="font-size:16px">Symptoms/problems/questions</p>
+                <input type="text" id="symptoms" name="symptoms" rows="4" cols="50">
+                <button id="sendButton">SEND</button>
+            </div>
+           
+        </div>
+
+    </form>
+
+    <script>
+        
+        var response = {{ data.output|tojson }};
+        const arrayResponse = Object.values(response);
+        console.log(arrayResponse);
+    
+        var i = 0;
+        var strings = arrayResponse;
+        console.log(strings);
+        var currentStringIndex = 0;
+        var currentString = strings[currentStringIndex];
+        var speed = 2;
+        var blinkInterval;
+
+        function typeWriter() {
+            if (i < currentString.length) {
+                document.getElementById("answer").innerHTML += currentString.charAt(i);
+                i++;
+                setTimeout(typeWriter, speed);
+            } else {
+                i = 0;
+                currentStringIndex++;
+                if (currentStringIndex < strings.length) {
+                    currentString = strings[currentStringIndex];
+                    setTimeout(typeWriter, speed * 3); // Pause between strings
+                } else {
+                    blinkCursor();
+                }
+            }
+        }
+        typeWriter();
+    
+    </script>
+</body>
+
+</html>
